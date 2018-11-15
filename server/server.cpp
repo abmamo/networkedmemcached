@@ -106,7 +106,7 @@ int main()
                 // delete from cache
                 cache_->del(k);
                 // set header information
-                resp.code = 202;
+                resp.code = 200;
                 resp.add_header("Content-Type", "application/json");
                 resp.add_header("Accept", "text/html");
                 // get current date as string
@@ -203,7 +203,7 @@ int main()
          // define response object
          crow::response resp;
          // set header information
-         resp.code = 202;
+         resp.code = 200;
          resp.add_header("Content-Type", "application/json");
          resp.add_header("Accept", "text/html");
          // get current date as string
