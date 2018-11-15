@@ -2,6 +2,7 @@
 #include <string>
 #include "crow.h"
 #include "cache.hh"
+#include "date.h"
 #include <list>
 
 
@@ -28,48 +29,103 @@ int main()
         // handle get requests
         if (req.method == "GET"_method)
         {
-           // define json object to return key value pair
-           crow::json::wvalue resp;
-           // get value from cache
-           Cache::val_type address = cache_ -> get(k, size);
-           // handle the key not being in the cache
-           if (address == nullptr) {
-              resp["error"] = "The key doesn't exist in cache";
-              return resp;
-           } 
-           else 
-           {
-              // key is the value the user passed
-              resp["key"] = k;
-              // deep copy value from address
-              int* address_data = new int[1];
-              memcpy(address_data, address, size);
-              // set the value in our json response
-              resp["value"] = *address_data;
-              // return json object
-              return resp;
-           }  
+           try {
+             // define response object
+             crow::response resp;
+             // define json object to hold the key value pair
+             crow::json::wvalue body;
+             // set header information
+             resp.code = 200;
+             resp.add_header("Content-Type", "application/json");
+             resp.add_header("Accept", "text/html");
+             // get current date as string
+             string timestamp = date::format("%F %T", std::chrono::system_clock::now());
+             // add date to header
+             resp.add_header("Date", timestamp);
+             resp.add_header("HTTP", "HTTP/1.1");
+             // close the connection after the request is complete
+             resp.add_header("Connection", "Close");
+ 
+             // get value from cache
+             Cache::val_type address = cache_ -> get(k, size);
+             // handle the key not being in the cache
+             if (address == nullptr) {
+                body["error"] = "The key doesn't exist in cache";
+                resp.write(crow::json::dump(body));
+                return resp;
+             } 
+             else 
+             {
+                // key is the value the user passed
+                body["key"] = k;
+                // deep copy value from address
+                int* address_data = new int[1];
+                memcpy(address_data, address, size);
+                // set the value in our json response
+                body["value"] = *address_data;
+                // write json to the body of the response
+                resp.write(crow::json::dump(body));
+                return resp;
+             }  
+          } catch (const std::exception& e) {
+               // return 500 response if server fails to get the mem used
+               return crow::response(500);
+           }
         }
         else if (req.method == "HEAD"_method)
         {
-           // return empty body with header
-           crow::json::wvalue resp;
-           return resp;
+            try {
+                // define response object
+                crow::response resp;
+                // define json object to hold the key value pair
+                crow::json::wvalue body;
+                // set header information
+                resp.code = 200;
+                resp.add_header("Content-Type", "application/json");
+                resp.add_header("Accept", "text/html");
+                // get current date as string
+                string timestamp = date::format("%F %T", std::chrono::system_clock::now());
+                // add date to header
+                resp.add_header("Date", timestamp);
+                resp.add_header("HTTP", "HTTP/1.1");
+                // close the connection after the request is complete
+                resp.add_header("Connection", "Close");
+                return resp;
+
+             } catch (const std::exception& e) {
+                // return 500 response if server fails to get the mem used
+                return crow::response(500);
+             }
+
         }
         else if (req.method == "DELETE"_method)
         {
-           // define json object
-           crow::json::wvalue resp;
-           // delete from cache
-           cache_->del(k);
-           // return empty response body
-           return resp;
-        }
-        else {
-           // condition to avoid returning a non void return etatement
-           crow::json::wvalue resp;
-           resp["error"] = "The request method is not allowed.";
-           return resp;
+             try {
+                // define response object
+                crow::response resp;
+                // delete from cache
+                cache_->del(k);
+                // set header information
+                resp.code = 202;
+                resp.add_header("Content-Type", "application/json");
+                resp.add_header("Accept", "text/html");
+                // get current date as string
+                string timestamp = date::format("%F %T", std::chrono::system_clock::now());
+                // add date to header
+                resp.add_header("Date", timestamp);
+                resp.add_header("HTTP", "HTTP/1.1");
+                // close the connection after the request is complete
+                resp.add_header("Connection", "Close");
+                return resp;
+                
+             } catch (const std::exception& e) {
+                // return 500 response if server fails to get the mem used
+                return crow::response(500);
+             }
+       }
+       else {
+           // other methods are not allowed return a 405 code if user tries to use them
+           return crow::response(405);
         }
     });
 
@@ -78,12 +134,32 @@ int main()
     // define route type as get
     .methods("GET"_method)
     ([&]() {
-        // define json object to return key value pair
-        crow::json::wvalue resp;
-        // set json response
-        resp["memused"] = cache_ -> space_used();
-        // return json object
-        return resp;
+        // try to get the space used so far
+        try {
+            // define response object
+            crow::response resp;
+            // define json object to hold the key value pair
+            crow::json::wvalue body;
+            // set header information
+            resp.code = 200;
+            resp.add_header("Content-Type", "application/json");
+            resp.add_header("Accept", "text/html");
+            // get current date as string
+            string timestamp = date::format("%F %T", std::chrono::system_clock::now());
+            // add date to header
+            resp.add_header("Date", timestamp);
+            resp.add_header("HTTP", "HTTP/1.1");
+            // close the connection after the request is complete
+            resp.add_header("Connection", "Close");
+            // set json response
+            body["memused"] = cache_ -> space_used();
+            // write the json object to the body of the string
+            resp.write(crow::json::dump(body));
+            return resp;
+        } catch (const std::exception& e) {
+            // return 500 response if server fails to get the mem used
+            return crow::response(500);
+        }
     });
 
     // create route for putting key value pair in cache
@@ -93,15 +169,28 @@ int main()
     ([&](string k, string v) {
        // try setting the value if not return a 404 error
        try {
+           // define response object
+           crow::response resp;
            // insert value into cache
            cache_ -> set(k, &v, size);
            // save key to be emptied later
            list_.push_back(k);
-           // return 200 response
-           return crow::response(200);
+           // set header information
+           resp.code = 201;
+           resp.add_header("Content-Type", "application/json");
+           resp.add_header("Accept", "text/html");
+           // get current date as string
+           string timestamp = date::format("%F %T", std::chrono::system_clock::now());
+           // add date to header
+           resp.add_header("Date", timestamp);
+           resp.add_header("HTTP", "HTTP/1.1");
+           // close the connection after the request is complete
+           resp.add_header("Connection", "Close");
+           return resp;
+ 
        } catch (const std::exception& e) {
-           // return 404 response if the put request failed
-           return crow::response(404);
+           // return 500 response if the put request failed
+           return crow::response(500);
        }
     }); 
 
@@ -110,19 +199,38 @@ int main()
     // define route type as delete
     .methods("POST"_method)
     ([&]() {
-       // get the beginning of the list
-       auto it = list_.begin();
-       // iterate through all the keys and delete them from cache
-       for (it=list_.begin(); it!=list_.end(); ++it)
-           // delete each key
+       try {
+         // define response object
+         crow::response resp;
+         // set header information
+         resp.code = 202;
+         resp.add_header("Content-Type", "application/json");
+         resp.add_header("Accept", "text/html");
+         // get current date as string
+         string timestamp = date::format("%F %T", std::chrono::system_clock::now());
+         // add date to header
+         resp.add_header("Date", timestamp);
+         resp.add_header("HTTP", "HTTP/1.1");
+         // close the connection after the request is complete
+         resp.add_header("Connection", "Close");
+ 
+
+         // get the beginning of the list where we stored all keys
+         auto it = list_.begin();
+         // iterate through all the keys in that list and delete them from cache
+         for (it=list_.begin(); it!=list_.end(); ++it)
+           // delete each key from cache
            cache_ -> del(*it);
-       // free iterator
-       // free cache
-       free(cache_);
-       // end server
-       app.stop();
-       // create response saying the server has been closed
-       return "Server has been shut down";
+         // free cache pointer
+         free(cache_);
+         // return an accepted status code
+         return resp;
+         // stop server
+         app.stop(); 
+       } catch (const std::exception& e) {
+         // if we fail to shutdown the server return 500 error code
+         return crow::response(500);
+       }
     });
 
     app.port(8080).multithreaded().run();
