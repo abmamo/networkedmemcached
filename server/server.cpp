@@ -133,7 +133,11 @@ int main()
     CROW_ROUTE(app, "/memsize")
     // define route type as get
     .methods("GET"_method)
-    ([&]() {
+    ([&](const crow::request& req) {
+     if (req.method != "GET"_method) {
+        return crow::response(405);
+     }
+     else {
         // try to get the space used so far
         try {
             // define response object
@@ -160,13 +164,19 @@ int main()
             // return 500 response if server fails to get the mem used
             return crow::response(500);
         }
+     }
     });
 
     // create route for putting key value pair in cache
     CROW_ROUTE(app, "/key/<string>/<string>")
     // define route type as put
     .methods("PUT"_method)
-    ([&](string k, string v) {
+    ([&](const crow::request& req, string k, string v) {
+     if (req.method != "PUT"_method) {
+        // if a method other than PUT is used return a 405 error
+        return crow::response(405);
+     }
+     else {
        // try setting the value if not return a 404 error
        try {
            // define response object
@@ -192,13 +202,19 @@ int main()
            // return 500 response if the put request failed
            return crow::response(500);
        }
+     }
     }); 
 
     // create route for safely resetting the cache
     CROW_ROUTE(app, "/shutdown")
     // define route type as delete
     .methods("POST"_method)
-    ([&]() {
+    ([&](const crow::request& req) {
+     if (req.method != "POST"_method) {
+        // if a method other than POST is used return a not allowed status
+        return crow::response(405);
+     }
+     else {
        try {
          // define response object
          crow::response resp;
@@ -231,6 +247,7 @@ int main()
          // if we fail to shutdown the server return 500 error code
          return crow::response(500);
        }
+     }
     });
 
     app.port(8080).multithreaded().run();
