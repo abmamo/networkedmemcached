@@ -31,9 +31,11 @@ The server works as expected and can be tested once it is up and running (using 
 
 ##### H5 PUT & GET Test
 ##### H6 Arrange
-`curl -X PUT localhost:8080/key/val/10`
+`curl -X PUT localhost:8080/key/val/hello`
 ##### H6 Assert
 `curl -X GET localhost:8080/key/val`
+
+will return {"key":"val","value":"hello"}
 
 ##### H5 PUT & DELETE Test
 ##### H6 Arrange
