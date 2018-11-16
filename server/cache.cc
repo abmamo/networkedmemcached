@@ -53,7 +53,8 @@ public:
        // deep copy values into cache
        memcpy(map_[key],val,size);
        // increment memory used
-       memused_ += size;
+       memused_ += sizeof(val);
+       cout << memused_ << endl;
        // add key to queue
        queue_.push(key);
     }

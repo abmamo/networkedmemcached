@@ -56,8 +56,8 @@ int main()
              } 
              else 
              {
-                // key is the value the user passed
-                body["key"] = k;
+
+
 
                 // get value pointer
                 auto val_ptr = static_cast<const char*>(address);
@@ -70,6 +70,9 @@ int main()
                 strncpy(val, val_ptr + 1, sizeof(val_ptr));
                 // set the value in our json response
                 body["value"] = val;
+                // key is the value the user passed
+                body["key"] = k;
+
                 // write json to the body of the response
                 resp.write(crow::json::dump(body));
                 return resp;
@@ -157,7 +160,6 @@ int main()
             resp.add_header("Accept", "text/html");
             // get current date as string
             string timestamp = date::format("%F %T", std::chrono::system_clock::now());
-            // add date to header
             resp.add_header("Date", timestamp);
             resp.add_header("HTTP", "HTTP/1.1");
             // close the connection after the request is complete

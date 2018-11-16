@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <curl/curl.h>
 #include "json.hpp"
+#include <unordered_map>
 
 using namespace std;
 using json = nlohmann::json;
@@ -36,28 +37,24 @@ public:
       CURL *curl;
       // declare a response object
       CURLcode res;
-
-
-      // define pointer to copy val into 
-      void * val_cpy = new val_type[size];
-      // copy the value into new variable
-      memcpy(val_cpy, val, size);
-      cout << *val_cpy; 
-
-      // build the url
-      // define stream variable
+      // define stream object to store url in
       ostringstream url_stream;
-      // add the base url
-      url_stream << "0.0.0.0:8080";
-      // append the key
-      url_stream << key;
-      // append the value
-      url_stream << val;
-      // conver to C++ string
+
+      // add base url to the stream object
+      url_stream << "0.0.0.0:8080/key/";
+
+      // add the key value to the stream object
+      url_stream << key << "/";
+      
+      // get value from val pointer
+      auto val_ptr = static_cast<const int*>(val);
+      // add value to stream object
+      url_stream << *val_ptr;
+
+      // convert stream to a string
       string str = url_stream.str();
-      // convert to char * since that's what libcurl accepts
-      const char* url = str.c_str();
-      cout << val << endl;
+      // convert string to c string as that's the type libcurl accepts
+      const char * url = str.c_str();
 
       // initialise curl object
       curl = curl_easy_init();
@@ -81,23 +78,26 @@ public:
 
   // function to get the value of a given key from the server
   val_type get(key_type key, index_type& size) const {
-      // declare curl objec tpointer
+      // declare a curl object pointer
       CURL *curl;
       // declare a response object
       CURLcode res;
-      // define stream object to store response
-      std::ostringstream stream;
-      // define url base
-      ostringstream temp_url;
-      // concatenate base
-      temp_url << "0.0.0.0:8080";
-      // concatenate key
-      temp_url << key;
-      // convert to c string
-      string str = temp_url.str();
-      // conver to char *
-      const char* url = str.c_str();
-      
+      // define stream object to store url in
+      ostringstream url_stream;
+      // define stream object to store response in
+      ostringstream stream;
+   
+      // add base url to the stream object
+      url_stream << "0.0.0.0:8080/key/";
+   
+      // add the key value to the stream object
+      url_stream << key;
+   
+      // convert stream to a string
+      string str = url_stream.str();
+      // convert string to c string as that's the type libcurl accepts
+      const char * url = str.c_str();
+
       // initialise curl object
       curl = curl_easy_init();
       // check if initialisation worked
@@ -112,11 +112,13 @@ public:
           // send the request
           res = curl_easy_perform(curl);
           // check for errors
-          //if (res != CURLE_OK)
+          if (res != CURLE_OK)
               // display the error
-          //    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+              fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
           // clean up curl
           curl_easy_cleanup(curl);
+
+          cout << stream.str() << endl;
           // save the response to a varible
           int response = json::parse(stream.str());
           cout << response << endl;
