@@ -216,13 +216,8 @@ int main()
     CROW_ROUTE(app, "/shutdown")
     // define route type as delete
     .methods("POST"_method)
-    ([&](const crow::request& req) {
-     if (req.method != "POST"_method) {
-        // if a method other than POST is used return a not allowed status
-        return crow::response(405);
-     }
-     else {
-       try {
+    ([&](const crow::request& req, crow::response& res) {
+         /*
          // define response object
          crow::response resp;
          // set header information
@@ -236,7 +231,7 @@ int main()
          resp.add_header("HTTP", "HTTP/1.1");
          // close the connection after the request is complete
          resp.add_header("Connection", "Close");
- 
+         */
 
          // get the beginning of the list where we stored all keys
          auto it = list_.begin();
@@ -246,15 +241,10 @@ int main()
            cache_ -> del(*it);
          // free cache pointer
          free(cache_);
-         // return an accepted status code
-         return resp;
+         // send response
+         res.end();
          // stop server
          app.stop(); 
-       } catch (const std::exception& e) {
-         // if we fail to shutdown the server return 500 error code
-         return crow::response(500);
-       }
-     }
     });
 
     app.port(8080).multithreaded().run();
