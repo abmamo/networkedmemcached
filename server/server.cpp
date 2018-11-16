@@ -217,21 +217,6 @@ int main()
     // define route type as delete
     .methods("POST"_method)
     ([&](const crow::request& req, crow::response& res) {
-         /*
-         // define response object
-         crow::response resp;
-         // set header information
-         resp.code = 200;
-         resp.add_header("Content-Type", "application/json");
-         resp.add_header("Accept", "text/html");
-         // get current date as string
-         string timestamp = date::format("%F %T", std::chrono::system_clock::now());
-         // add date to header
-         resp.add_header("Date", timestamp);
-         resp.add_header("HTTP", "HTTP/1.1");
-         // close the connection after the request is complete
-         resp.add_header("Connection", "Close");
-         */
 
          // get the beginning of the list where we stored all keys
          auto it = list_.begin();

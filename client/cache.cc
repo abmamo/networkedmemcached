@@ -37,6 +37,13 @@ public:
       // declare a response object
       CURLcode res;
 
+
+      // define pointer to copy val into 
+      void * val_cpy = new val_type[size];
+      // copy the value into new variable
+      memcpy(val_cpy, val, size);
+      cout << *val_cpy; 
+
       // build the url
       // define stream variable
       ostringstream url_stream;
@@ -50,6 +57,7 @@ public:
       string str = url_stream.str();
       // convert to char * since that's what libcurl accepts
       const char* url = str.c_str();
+      cout << val << endl;
 
       // initialise curl object
       curl = curl_easy_init();
@@ -104,9 +112,9 @@ public:
           // send the request
           res = curl_easy_perform(curl);
           // check for errors
-          if (res != CURLE_OK)
+          //if (res != CURLE_OK)
               // display the error
-              fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+          //    fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
           // clean up curl
           curl_easy_cleanup(curl);
           // save the response to a varible
