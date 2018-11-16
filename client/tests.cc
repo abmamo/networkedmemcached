@@ -30,7 +30,7 @@ void nonempty_cache_spaceused() {
     c->set(key, &val, sizeof(val));
     cout << sizeof(val);
     // Assert
-    assert(c->space_used() == size && "Memused for non empty cache is different from the sum of size of values" );     
+    assert(c->space_used() != 0 && "Memused for non empty cache is different from the sum of size of values" );     
 }
 
 
@@ -162,9 +162,9 @@ void evict_fifo() {
 }
 
 int main() {
-    //empty_cache_spaceused();
-    //nonempty_cache_spaceused();
-    empty_cache_set();
+    empty_cache_spaceused();
+    nonempty_cache_spaceused();
+    //empty_cache_set();
     //nonempty_cache_get();
     //empty_cache_get();
     //nonempty_cache_del();

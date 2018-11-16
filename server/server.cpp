@@ -57,8 +57,6 @@ int main()
              else 
              {
 
-
-
                 // get value pointer
                 auto val_ptr = static_cast<const char*>(address);
                 // get length of the pointer in addition with 1
