@@ -110,11 +110,8 @@ public:
           // clean up curl
           curl_easy_cleanup(curl);
           // save the response to a varible
-          auto response = json::parse(stream.str());
-          // process the response data
-          // have to cast it to void * because of val_type
-          static const val_type e = (void *)response.value(key, 0);
-          return e;
+          int response = json::parse(stream.str());
+          cout << response << endl;
 
       }
       val_type res_value = "";

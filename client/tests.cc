@@ -15,7 +15,6 @@ void empty_cache_spaceused() {
     // Act
     Cache* c = new Cache(cache_length*size);
     // Assert
-    cout << c->space_used() << endl;
     assert(c->space_used() == 0 && "Memused for an empty cache is different from 0");
 }
 
@@ -30,6 +29,7 @@ void nonempty_cache_spaceused() {
     int val = 18;
     c->set(key, &val, size);
     // Assert
+    cout << c->space_used() << endl;
     assert(c->space_used() == size && "Memused for non empty cache is different from the sum of size of values" );     
 }
 

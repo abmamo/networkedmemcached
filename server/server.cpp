@@ -58,11 +58,18 @@ int main()
              {
                 // key is the value the user passed
                 body["key"] = k;
-                // deep copy value from address
-                int* address_data = new int[1];
-                memcpy(address_data, address, size);
+
+                // get value pointer
+                auto val_ptr = static_cast<const char*>(address);
+                // get length of the pointer in addition with 1
+                // for the terminating character
+                size_t len = strlen(val_ptr) + 1;
+                // declare new c string to copy into 
+                char val[len];
+                // use inbuilt strncpy to copy the value
+                strncpy(val, val_ptr + 1, sizeof(val_ptr));
                 // set the value in our json response
-                body["value"] = *address_data;
+                body["value"] = val;
                 // write json to the body of the response
                 resp.write(crow::json::dump(body));
                 return resp;
@@ -182,7 +189,7 @@ int main()
            // define response object
            crow::response resp;
            // insert value into cache
-           cache_ -> set(k, &v, size);
+           cache_ -> set(k, &v, sizeof(v));
            // save key to be emptied later
            list_.push_back(k);
            // set header information
